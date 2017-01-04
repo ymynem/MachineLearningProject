@@ -9,7 +9,7 @@ def subsequence_kernel_double_primed(s, t, l, i):
     elif min(len(s), len(t)) < i:
         return 0
     else:
-        x = s[-1]  # last character, I am unsure of this, what do they mean by sx? head and tail
+        x = s[-1]  # last character. sx means the hole string, when they write s they mean exclude last char
         the_sum = 0
         for j in range(len(t)):
             if t[-1] == s[-1]:
@@ -33,11 +33,10 @@ def subsequence_kernel_primed(s, t, l, i):  # where (i = 1, … , n-1)
     elif min(len(s), len(t)) < i:  #
         return 0
     else:
-        x = s[-1]  # last character and sx means the hole string, when they write only s they mean exclude last char
+        x = s[-1]  # last character. sx means the hole string, when they write only s they mean exclude last char
         the_sum = 0
         for j in range(len(t)):
             if t[j] == x:
-                #   print("i =", i, " Answer = 1 and len of s and t is ", len(s), len(t), " s[:- 1] = ", s[:- 1], " t[:j-1] =", t[:j-1])
                 the_sum += subsequence_kernel_primed(s[:-1], t[:j], l, i - 1) * l ** (len(t) - j + 2)
     res = l * subsequence_kernel_primed(s[:-1], t, l, i) + the_sum
     return res
