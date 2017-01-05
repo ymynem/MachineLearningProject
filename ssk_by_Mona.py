@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ page 424
 """
 import math
@@ -90,4 +91,4 @@ def main():
     print(res)
 
 
-main()
+# main()
