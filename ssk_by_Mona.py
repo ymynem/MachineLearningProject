@@ -3,6 +3,8 @@
 """
 import math
 import cProfile
+from functools import lru_cache, partial
+
 
 def subsequence_kernel_double_primed(s, t, l, i):
     if i == 0:
@@ -14,34 +16,38 @@ def subsequence_kernel_double_primed(s, t, l, i):
         the_sum = 0
         for j in range(len(t)):
             if t[-1] == s[-1]:
-                res = l * subsequence_kernel_double_primed(s[:-1], t, l, i) + l * subsequence_kernel_primed(s[:-1], t,
-                                                                                                            l, i)
+              #  res = l * subsequence_kernel_double_primed(s[:-1], t, l, i) + l * subsequence_kernel_primed_lru_wrapped(s[:-1], t,
+              #                                                                                              l, i)
                 return res
 
 
-def subsequence_kernel_primed(s, s_counter, t, jtot, l, i):  # where (i = 1, … , n-1)
-    """
-    In order to deal with non-contiguous substrings, it is necessary to
-    introduce a decay factor λ ∈ (0, 1) that can be used to weight the presence of a certain feature in a text
-    :param s: string 1
-    :param t: string 2
-    :param l: lambda represents the weight?
-    :param i: length of subsequence
-    :return:
-    """
-    if i == 0:
-        return 1
-    elif min(s_counter,jtot) < i:  #
-        return 0
-    else:
-        x = s[s_counter - 1]  # last character. sx means the hole string, when they write only s they mean exclude last char
-        the_sum = 0
+def subsequence_kernel_primed_lru_wrapped(s, t):
+    @lru_cache(maxsize=None)
+    def subsequence_kernel_primed(s_counter, jtot, l, i):  # where (i = 1, … , n-1)
+        """
+        In order to deal with non-contiguous substrings, it is necessary to
+        introduce a decay factor λ ∈ (0, 1) that can be used to weight the presence of a certain feature in a text
+        :param s: string 1
+        :param t: string 2
+        :param l: lambda represents the weight?
+        :param i: length of subsequence
+        :return:
+        """
+        if i == 0:
+            return 1
+        elif min(s_counter, jtot) < i:  #
+            return 0
+        else:
+            x = s[s_counter - 1]  # last character. sx means the hole string, when they write only s they mean exclude last char
+            the_sum = 0
 
-        for j in range(jtot):
-            if x == t[j]:
-                the_sum += subsequence_kernel_primed(s, s_counter - 1, t, j, l, i - 1) * l ** (jtot - j + 2)
-    res = l * subsequence_kernel_primed(s, s_counter - 1, t, jtot, l, i) + the_sum
-    return res
+            for j in range(jtot):
+                if x == t[j]:
+                    the_sum += subsequence_kernel_primed_lru_wrapped(s, t)(s_counter - 1, j, l, i - 1) * l ** (jtot - j + 2)
+        res = l * subsequence_kernel_primed_lru_wrapped(s, t)(s_counter - 1, jtot, l, i) + the_sum
+        return res
+
+    return subsequence_kernel_primed
 
 
 def subsequence_kernel(s, t, l, n):  # where (i = 1, … , n-1)
@@ -63,7 +69,7 @@ def subsequence_kernel(s, t, l, n):  # where (i = 1, … , n-1)
             x = s[-1]
             for j in range(len(t)):
                 if t[j] == x:
-                    the_sum += subsequence_kernel_primed(s, s_len-1, t, j, l, n - 1) * l ** 2  # [:-1]
+                    the_sum += subsequence_kernel_primed_lru_wrapped(s, t)(s_len - 1, j, l, n - 1) * l ** 2  # [:-1]
     res = subsequence_kernel(s[:-1], t, l, n) + the_sum
     return res
 
@@ -71,6 +77,7 @@ def subsequence_kernel(s, t, l, n):  # where (i = 1, … , n-1)
 def normalize(s, t, l, n):
     norm = subsequence_kernel(s, t, l, n) / math.sqrt(subsequence_kernel(s, s, l, n) * subsequence_kernel(t, t, l, n))
     return norm
+
 
 
 def main():
@@ -86,15 +93,16 @@ def main():
     """
 
     #   print("1: ", subsequence_kernel_primed("car", "cat", 0.5, 2))
-    #s = "Anyone who reads Old and Middle English"
-    #t = "Πόθεν, ὦ Σώκρατες, φαίνῃ; Ἤ δῆλα δὴ ὅτι"
-    s= "science is organized knowledge"
-    t= "wisdom is organized life"
+    # s = "Anyone who reads Old and Middle English"
+    # t = "Πόθεν, ὦ Σώκρατες, φαίνῃ; Ἤ δῆλα δὴ ὅτι"
     l = 0.5
-    n = 3
+    n = 2
+    s_glob = "and normal sized documents, direct "
+    t_glob = "will follow automatically from its "
 
-    res = normalize(s, t, l, n)
+    res = normalize(s_glob, t_glob, l, n)
     print(res)
+
 
 
 cProfile.run('main()')
