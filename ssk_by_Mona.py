@@ -38,13 +38,14 @@ def subsequence_kernel_primed_lru_wrapped(s, t):
         elif min(s_counter, jtot) < i:  #
             return 0
         else:
-            x = s[s_counter - 1]  # last character. sx means the hole string, when they write only s they mean exclude last char
+            s_counter_minus_one = s_counter - 1
+            x = s[s_counter_minus_one]  # last character. sx means the hole string, when they write only s they mean exclude last char
             the_sum = 0
-
+            i_minus_one = i -1
             for j in range(jtot):
                 if x == t[j]:
-                    the_sum += subsequence_kernel_primed_lru_wrapped(s, t)(s_counter - 1, j, l, i - 1) * l ** (jtot - j + 2)
-        res = l * subsequence_kernel_primed_lru_wrapped(s, t)(s_counter - 1, jtot, l, i) + the_sum
+                    the_sum += subsequence_kernel_primed(s_counter_minus_one, j, l, i_minus_one) * l ** (jtot - j + 2)
+        res = l * subsequence_kernel_primed(s_counter_minus_one, jtot, l, i) + the_sum
         return res
 
     return subsequence_kernel_primed
@@ -61,15 +62,18 @@ def subsequence_kernel(s, t, l, n):  # where (i = 1, … , n-1)
     :return:
     """
     s_len = len(s)
+    lru_wrapped_func = subsequence_kernel_primed_lru_wrapped(s, t)
     if min(s_len, len(t)) < n:
         return 0
     else:
         the_sum = 0
         if n > 0:
             x = s[-1]
+            s_len_minus_one = s_len - 1
+            n_minus_one = n - 1
             for j in range(len(t)):
                 if t[j] == x:
-                    the_sum += subsequence_kernel_primed_lru_wrapped(s, t)(s_len - 1, j, l, n - 1) * l ** 2  # [:-1]
+                    the_sum += lru_wrapped_func(s_len_minus_one, j, l, n_minus_one) * l ** 2  # [:-1]
     res = subsequence_kernel(s[:-1], t, l, n) + the_sum
     return res
 
@@ -92,15 +96,25 @@ def main():
   L(I) = 5 - 0 + 1 = 6
     """
 
+    """
+    s= "science is organized knowledge"
+    t= "wisdom is organized life"
+     K1 = 0.580, K2 = 0.580, K3 = 0.478, K4 = 0.439, K5 = 0.406, K6 = 0.370
+    """
     #   print("1: ", subsequence_kernel_primed("car", "cat", 0.5, 2))
-    # s = "Anyone who reads Old and Middle English"
-    # t = "Πόθεν, ὦ Σώκρατες, φαίνῃ; Ἤ δῆλα δὴ ὅτι"
+    #   s = "Anyone who reads Old and Middle English"
+    #   t = "Πόθεν, ὦ Σώκρατες, φαίνῃ; Ἤ δῆλα δὴ ὅτι"
     l = 0.5
     n = 2
-    s_glob = "and normal sized documents, direct "
-    t_glob = "will follow automatically from its "
+    s = "wisdom is organized life is franca.Named after the Angles, wisdom is organized life one of the Germanic "
+    t = "English is a West Germanic language that was first spoken in early medieval England and is franca.Named after the Angles, "
+    print("s = ",len(s))
+    print("t = ",len(t))
 
-    res = normalize(s_glob, t_glob, l, n)
+    if s == t:
+        res = 1
+    else:
+        res = normalize(s, t, l, n)
     print(res)
 
 
