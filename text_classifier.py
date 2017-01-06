@@ -12,11 +12,11 @@ def buildGramMat(sList, tList, l, n):
 	lenT = len(tList)
 
 	gramMat = np.zeros((lenS, lenT), dtype=np.float64)
-
+	print("Hi")
 	for i in range(lenS):
 		for j in range(lenT):
 			gramMat[i, j] = normalize(sList[i], tList[j], l, n)  # here to calculate the ssk value
-			print 'normalize done!'
+			print ('normalize done!')
 
 	return gramMat
 
@@ -52,3 +52,4 @@ def textClassify():
 	svc = train(trainX, trainY, l, n)
 	return predict(svc, news.data[trainSize:trainSize+testSize], trainX, l, n)     
 
+textClassify()

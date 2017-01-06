@@ -2,7 +2,7 @@
 """ page 424
 """
 import math
-
+import cProfile
 
 def subsequence_kernel_double_primed(s, t, l, i):
     if i == 0:
@@ -19,7 +19,7 @@ def subsequence_kernel_double_primed(s, t, l, i):
                 return res
 
 
-def subsequence_kernel_primed(s, t, l, i):  # where (i = 1, … , n-1)
+def subsequence_kernel_primed(s, s_counter, t, jtot, l, i):  # where (i = 1, … , n-1)
     """
     In order to deal with non-contiguous substrings, it is necessary to
     introduce a decay factor λ ∈ (0, 1) that can be used to weight the presence of a certain feature in a text
@@ -31,15 +31,16 @@ def subsequence_kernel_primed(s, t, l, i):  # where (i = 1, … , n-1)
     """
     if i == 0:
         return 1
-    elif min(len(s), len(t)) < i:  #
+    elif min(s_counter,jtot) < i:  #
         return 0
     else:
-        x = s[-1]  # last character. sx means the hole string, when they write only s they mean exclude last char
+        x = s[s_counter - 1]  # last character. sx means the hole string, when they write only s they mean exclude last char
         the_sum = 0
-        for j in range(len(t)):
-            if t[j] == x:
-                the_sum += subsequence_kernel_primed(s[:-1], t[:j], l, i - 1) * l ** (len(t) - j + 2)
-    res = l * subsequence_kernel_primed(s[:-1], t, l, i) + the_sum
+
+        for j in range(jtot):
+            if x == t[j]:
+                the_sum += subsequence_kernel_primed(s, s_counter - 1, t, j, l, i - 1) * l ** (jtot - j + 2)
+    res = l * subsequence_kernel_primed(s, s_counter - 1, t, jtot, l, i) + the_sum
     return res
 
 
@@ -53,15 +54,16 @@ def subsequence_kernel(s, t, l, n):  # where (i = 1, … , n-1)
     :param n: length of string
     :return:
     """
-    if min(len(s), len(t)) < n:
+    s_len = len(s)
+    if min(s_len, len(t)) < n:
         return 0
     else:
         the_sum = 0
         if n > 0:
+            x = s[-1]
             for j in range(len(t)):
-                x = s[-1]
                 if t[j] == x:
-                    the_sum += subsequence_kernel_primed(s[:-1], t[:j], l, n - 1) * l ** 2  # [:-1]
+                    the_sum += subsequence_kernel_primed(s, s_len-1, t, j, l, n - 1) * l ** 2  # [:-1]
     res = subsequence_kernel(s[:-1], t, l, n) + the_sum
     return res
 
@@ -82,13 +84,17 @@ def main():
   L(I) = i_|u| - i_1 + 1
   L(I) = 5 - 0 + 1 = 6
     """
+
     #   print("1: ", subsequence_kernel_primed("car", "cat", 0.5, 2))
-    s = "science is organized knowledge" #  'cat'  #
-    t = "wisdom is organized life"  # 'car'
+    #s = "Anyone who reads Old and Middle English"
+    #t = "Πόθεν, ὦ Σώκρατες, φαίνῃ; Ἤ δῆλα δὴ ὅτι"
+    s= "science is organized knowledge"
+    t= "wisdom is organized life"
     l = 0.5
-    n = 5
+    n = 3
+
     res = normalize(s, t, l, n)
     print(res)
 
 
-# main()
+cProfile.run('main()')
