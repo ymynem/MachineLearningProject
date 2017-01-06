@@ -1,48 +1,60 @@
 import nltk
 from sklearn.feature_extraction.text import CountVectorizer
 
-# Make sure we have all the data
-nltk.download("reuters")
-nltk.download("stopwords")
-
 from nltk.corpus import reuters, stopwords
 
 
-def _get_ids_starting_with(start):
-    return list(filter(lambda id: id.startswith(start), reuters.fileids()))
+def download():
+    nltk.download("reuters")
+    nltk.download("stopwords")
 
 
-def get_training_ids():
-    return _get_ids_starting_with("train")
+def _fileids_starting_with(ids, start):
+    return list(filter(lambda i: i.startswith(start), ids))
+
+
+def training_ids(fileids):
+    return _fileids_starting_with(fileids, "train")
 
  
-def get_test_ids():
-    return _get_ids_starting_with("test")
+def test_ids(fileids):
+    return _fileids_starting_with(fileids, "test")
 
 
-def clean_documents(documents):
+def get_category_ids(category):
+    return reuters.fileids(category)
+
+
+def categories(fileids):
+    return reuters.categories(fileids)
+
+
+def get_documents(category):
+    docs = get_category_ids(category)
+    return training_ids(docs), test_ids(docs)
+
+
+def create_corpus(fileids):
     """
     Remove stopwords and punctuation
     Returns a list of strings
     """
     sw = set(stopwords.words("english"))
     corpus = []
-    for d in documents:
-        words = (w.lower() for w in reuters.words(d))
+    for doc in fileids:
+        words = (w.lower() for w in reuters.words(doc))
         corpus.append(" ".join(w for w in words if w not in sw))
     return corpus
 
 
-def get_ngram(docs, n):
-    corpus = clean_documents(docs)
+def get_ngram(corpus, n):
     ngram = CountVectorizer(analyzer="char", ngram_range=(n, n), min_df=1)
     counts = ngram.fit_transform(corpus)
-    return ngram.get_feature_names(), counts.toarray().astype(int)
+    return ngram, counts.toarray().astype(int)
 
 
-def get_bow(docs):
-    corpus = clean_documents(docs)
+def get_bow(corpus):
     v = CountVectorizer(analyzer="word", min_df=1)
     bow = v.fit_transform(corpus)
-    return v.get_feature_names(), bow.toarray()
+    return v, bow.toarray()
 
