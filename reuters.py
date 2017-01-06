@@ -5,6 +5,9 @@ from nltk.corpus import reuters, stopwords
 
 
 def download():
+    """
+    Download reuters data and stopwords if not already present"
+    """
     nltk.download("reuters")
     nltk.download("stopwords")
 
@@ -22,21 +25,31 @@ def test_ids(fileids):
 
 
 def get_category_ids(category):
+    """
+    Returns list of fileids in a category
+    """
     return reuters.fileids(category)
 
 
 def categories(fileids):
+    """
+    Returns all categories for fileids
+    """
     return reuters.categories(fileids)
 
 
 def get_documents(category):
+    """
+    Returns training and testing fileids for a category
+    """
     docs = get_category_ids(category)
     return training_ids(docs), test_ids(docs)
 
 
 def create_corpus(fileids):
     """
-    Remove stopwords and punctuation
+    Creates a corpus from fileids
+    Removes stopwords and punctuation
     Returns a list of strings
     """
     sw = set(stopwords.words("english"))
