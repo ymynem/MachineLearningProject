@@ -1,7 +1,5 @@
 import numpy as np
 from sklearn import svm
-from sklearn.svm import libsvm
-from sklearn.datasets import fetch_20newsgroups
 
 from ssk_by_Mona import normalize
 from reuters import *
@@ -13,31 +11,36 @@ def buildGramMat(sList, tList, l, n):
 	lenT = len(tList)
 
 	gramMat = np.zeros((lenS, lenT), dtype=np.float64)
-	print("Hi")
-	for i in range(lenS):
-		for j in range(lenT):
-			if i == j:
-				gramMat[i][j] = 1
-				print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
-			elif gramMat[j][i] != 0:
-				gramMat[i][j] = gramMat[j][i]
-				print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
-			else:
-				gramMat[i, j] = normalize(sList[i], tList[j], l, n)  # here to calculate the ssk value
-				print ('normalize done!')
+	gramMat[:] = -1
+
+	# optimize calculation of kernel gram matrix when sList equals to tList
+	if sList is tList:
+		print("Hi")
+		for i in range(lenS):
+			for j in range(lenT):
+				if i == j:
+					gramMat[i][j] = 1
+					print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
+				elif gramMat[i][j] == -1:
+					gramMat[i][j] = gramMat[j][i] = normalize(sList[i], tList[j], l, n)  # here to calculate the ssk value
+					print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
+	else:
+		for i in range(lenS):
+			for j in range(lenT):
+				gramMat[i][j] = normalize(sList[i], tList[j], l, n)  # here to calculate the ssk value
 				print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
 
 	return gramMat
 
 
 def train(data, label, l, n):
-	svc = svm.SVC(kernel='precomputed')
-
 	# build kernel matrix of training data
 	gramMat = buildGramMat(data, data, l, n)
-	# train support vector classification
-	svc.fit(gramMat, label)
 
+	# train support vector classification
+	svc = svm.SVC(kernel='precomputed')
+	svc.fit(gramMat, label)
+	
 	return svc
 
 
@@ -48,19 +51,10 @@ def predict(svc, dataTest, dataTrain, l, n):
 
 
 def textClassify(cat1, cat2):
-	#trainSize = 2
-	#testSicze = 2
-
 	n = 2
 	l = 0.5
 
-	'''
-	news = fetch_20newsgroups(subset='train')
-	trainX = news.data[:trainSize]
-	trainY = news.target[:trainSize]
-	'''
-
-	# train the SVC
+	# train the SVC using reuters datasets
 	a_train, a_test = get_documents(cat1)
 	b_train, b_test = get_documents(cat2)
 
@@ -69,11 +63,11 @@ def textClassify(cat1, cat2):
 	trainX = create_corpus(a_train + b_train)
 	trainY = [cat1]*len(a_train) + [cat2]*len(b_train)
 
-	print trainX[0]
+	#print trainX[0]   # print the fisrt training text
 
 	svc = train(trainX, trainY, l, n)
 
-	# classify
+	# classify test data
 	testX = create_corpus(a_test + b_test)
 	testY = [cat1]*len(a_test) + [cat2]*len(b_train)
 
