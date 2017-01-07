@@ -55,15 +55,12 @@ def buildGramMat(sList, tList, l, n):
 
     return gramMat
 
-
-
 # train svc with kernel gram matrix of training data
 def train(data, label, l, n):
-
     # build kernel matrix of training data
     gramMat = buildGramMat(data, data, l, n)
 
-    # train support vector classification
+    # train support vector classification (svc) with above gram matrix built
     svc = svm.SVC(kernel='precomputed')
     """"A column-vector y was passed when a 1d array was"
                           " expected. Please change the shape of y to "
@@ -71,17 +68,17 @@ def train(data, label, l, n):
     svc.fit(gramMat, label) #np.ravel(label)
     return svc
 
-
-
 # predict new dataset
 def predict(svc, dataTest, dataTrain, l, n):
-    # build kernel gram matrix of training data and test data
+	# build kernel gram matrix of training data and test data
     gramMat = buildGramMat(dataTest, dataTrain, l, n)  # G[i][j] = K(a[i],b[j]) a,b är list of documents, our inputs to the ssk kernel
     return svc.predict(gramMat)
 
 
+
 # retrieve and clean reuters data, wrap up method of train and predict
 def textClassify(cat1, cat2):
+
     n = 2
     l = 0.5
 
@@ -118,29 +115,3 @@ if __name__ == "__main__":
     textClassify('acq', 'corn')
     #print(textClassify('acq', 'corn'))
     Profile.run('textClassify()')
-	n = 2
-	l = 0.5
-
-	# train the SVC using reuters datasets
-	# get raw doc
-	a_train, a_test = get_documents(cat1)
-	b_train, b_test = get_documents(cat2)
-
-	print("Number of documents:", len(a_train), len(b_train))
-
-	# clean the doc
-	trainX = create_corpus(a_train + b_train)
-	trainY = [cat1]*len(a_train) + [cat2]*len(b_train)
-
-	#print trainX[0]   # print the fisrt training text for test
-
-	svc = train(trainX, trainY, l, n)
-
-	# classify test data
-	testX = create_corpus(a_test + b_test)
-	testY = [cat1]*len(a_test) + [cat2]*len(b_train)
-
-	return predict(svc, testX, trainX, l, n)     
-
-# textClassify('acq', 'corn')
-
