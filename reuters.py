@@ -53,9 +53,10 @@ def create_corpus(fileids):
     Returns a list of strings
     """
     sw = set(stopwords.words("english"))
+    tokenizer = nltk.tokenize.RegexpTokenizer(r"[A-Za-z]+")
     corpus = []
     for doc in fileids:
-        words = (w.lower() for w in reuters.words(doc))
+        words = (w.lower() for w in tokenizer.tokenize(reuters.raw(doc)))
         corpus.append(" ".join(w for w in words if w not in sw))
     return corpus
 
