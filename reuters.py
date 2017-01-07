@@ -1,4 +1,5 @@
 import nltk
+#NLTK
 from sklearn.feature_extraction.text import CountVectorizer
 
 from nltk.corpus import reuters, stopwords
