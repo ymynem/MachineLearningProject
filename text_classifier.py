@@ -24,7 +24,7 @@ def Sorting(corpus):
     return S
 
 
-# build kernel matrix of string list s and string list t
+# build kernel matrix of string list s and string list t with ssk
 def buildGramMat(sList, tList, l, n):
     # slist = train
     # tlist = test
@@ -34,6 +34,7 @@ def buildGramMat(sList, tList, l, n):
     gramMat[:] = -1  # fyller med -1or
 
     # optimize calculation of kernel gram matrix when sList equals to tList
+	# in our case, this is to save calculation for kernel gram matrix of training data
     if sList is tList:  # sList is the same object as tList
         for i in range(lenS):
             for j in range(lenT):
@@ -44,6 +45,8 @@ def buildGramMat(sList, tList, l, n):
                     gramMat[i][j] = gramMat[j][i] = normalize(sList[i], tList[j], l,
                                                               n)  # here to calculate the ssk value
                 # print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
+    # without the two list equal to one another, we have to calculate every element for gram matrix
+	# in our case, this is for kernel gram matrix of training data and test data
     else:
         for i in range(lenS):
             for j in range(lenT):
@@ -53,7 +56,10 @@ def buildGramMat(sList, tList, l, n):
     return gramMat
 
 
+
+# train svc with kernel gram matrix of training data
 def train(data, label, l, n):
+
     # build kernel matrix of training data
     gramMat = buildGramMat(data, data, l, n)
 
@@ -66,12 +72,15 @@ def train(data, label, l, n):
     return svc
 
 
+
 # predict new dataset
 def predict(svc, dataTest, dataTrain, l, n):
+    # build kernel gram matrix of training data and test data
     gramMat = buildGramMat(dataTest, dataTrain, l, n)  # G[i][j] = K(a[i],b[j]) a,b är list of documents, our inputs to the ssk kernel
     return svc.predict(gramMat)
 
 
+# retrieve and clean reuters data, wrap up method of train and predict
 def textClassify(cat1, cat2):
     n = 2
     l = 0.5
@@ -109,3 +118,29 @@ if __name__ == "__main__":
     textClassify('acq', 'corn')
     #print(textClassify('acq', 'corn'))
     Profile.run('textClassify()')
+	n = 2
+	l = 0.5
+
+	# train the SVC using reuters datasets
+	# get raw doc
+	a_train, a_test = get_documents(cat1)
+	b_train, b_test = get_documents(cat2)
+
+	print("Number of documents:", len(a_train), len(b_train))
+
+	# clean the doc
+	trainX = create_corpus(a_train + b_train)
+	trainY = [cat1]*len(a_train) + [cat2]*len(b_train)
+
+	#print trainX[0]   # print the fisrt training text for test
+
+	svc = train(trainX, trainY, l, n)
+
+	# classify test data
+	testX = create_corpus(a_test + b_test)
+	testY = [cat1]*len(a_test) + [cat2]*len(b_train)
+
+	return predict(svc, testX, trainX, l, n)     
+
+# textClassify('acq', 'corn')
+
