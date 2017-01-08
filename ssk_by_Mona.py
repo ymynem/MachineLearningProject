@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """ page 424
 """
+import sys
 import math
 import cProfile
 from functools import lru_cache, partial
 
+sys.setrecursionlimit(100000)
 
 def subsequence_kernel_double_primed(s, t, l, i):
     if i == 0:
@@ -73,19 +75,28 @@ def subsequence_kernel(s, t, l, n):  # where (i = 1, … , n-1)
             n_minus_one = n - 1
             for j in range(len(t)):
                 if t[j] == x:
-                    the_sum += lru_wrapped_func(s_len_minus_one, j, l, n_minus_one) * l ** 2  # [:-1]
-    res = subsequence_kernel(s[:-1], t, l, n) + the_sum
+                    the_sum += lru_wrapped_func(s_len_minus_one, j, l, n_minus_one)  # [:-1]
+                   
+    res = subsequence_kernel(s[:-1], t, l, n) + the_sum * l ** 2
     return res
 
 
 def normalize(s, t, l, n):
-    norm = subsequence_kernel(s, t, l, n) / math.sqrt(subsequence_kernel(s, s, l, n) * subsequence_kernel(t, t, l, n))
-    return norm
+    if s == t:
+            return 1
+    elif min(len(s),len(t)) < n:
+            return 0
+    else:        
+        try:
+            norm = subsequence_kernel(s, t, l, n) / (subsequence_kernel(s, s, l, n) * subsequence_kernel(t, t, l, n )) **0.5
+            return norm
+        except ZeroDivisionError:
+            print("Slen=", len(s), " Tlen=", len(t), " n =", n, " Zerodiverror")
+            #sys.exit(2)
 
 
-
-def main():
-    """
+"""def main():
+    """"""
   s = string
   u = sing
   I = [0,3,4,5]
@@ -94,20 +105,18 @@ def main():
   |u| = 4
   L(I) = i_|u| - i_1 + 1
   L(I) = 5 - 0 + 1 = 6
-    """
-
-    """
+    
     s= "science is organized knowledge"
     t= "wisdom is organized life"
      K1 = 0.580, K2 = 0.580, K3 = 0.478, K4 = 0.439, K5 = 0.406, K6 = 0.370
-    """
+    """"""
     #   print("1: ", subsequence_kernel_primed("car", "cat", 0.5, 2))
     #   s = "Anyone who reads Old and Middle English"
     #   t = "Πόθεν, ὦ Σώκρατες, φαίνῃ; Ἤ δῆλα δὴ ὅτι"
     l = 0.5
     n = 2
-    s = "wisdom is organized life is franca.Named after the Angles, wisdom is organized life one of the Germanic "
-    t = "English is a West Germanic language that was first spoken in early medieval England and is franca.Named after the Angles, "
+    s = "wisdom is organized life is f the Angles aldkjalks dasjd lasjdlkajd aoskdpoa dopa pod paods poasd andsjkalsj djaskjd lkajs dkljasd lskaj dlkjas dlkajsd lkajsda sdklj opi dpoad opais dpoasid poaid poasid aposdi aposdi apodi opadsi poasd ipoasd "
+    t = "English is a West Germanic language thatNamed after the Angles,  asjdkalsjd laksjdlkaj sdklajsd klajsd lkadklajdklajd lakjd lkasjd lkaj dlkajsd lkajsd lkajsdl kjslkdjjkhsa kjhd kjahsdjk ashd kjahsdkj asdhkjahd kjasdkjsdkhaskjd kajshdkj asdkjashd ksjhd kaslajksd "
     print("s = ",len(s))
     print("t = ",len(t))
 
@@ -117,6 +126,4 @@ def main():
         res = normalize(s, t, l, n)
     print(res)
 
-
-
-cProfile.run('main()')
+cProfile.run('main()')"""
