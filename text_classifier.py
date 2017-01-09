@@ -1,6 +1,6 @@
 import numpy as np
 from ssk_by_Mona import normalize
-from sklearn import svm
+from sklearn import svm, metrics
 from reuters import *
 from subset_creator import *
 import cProfile
@@ -64,11 +64,10 @@ def partition(dataset, fraction):
 
 # retrieve and clean reuters data, wrap up method of train and predict
 def textClassify(cat1, cat2):
-    n = 3
+    n = 2
     l = 0.5
     word_frqu = 3
-    len_of_word = 6
-    fraction = 1 / 30
+    len_of_word = 5
 
     # train the SVC using reuters datasets
     a_train, a_test = get_documents(cat1)
@@ -91,19 +90,25 @@ def textClassify(cat1, cat2):
         b_train_first_part)  # lista av orden acq och en lista av "corn"
     testY = [cat1] * len(a_test_first_part) + [cat2] * len(b_test_first_part)  # skapar testdata
     svc = train(trainX_most_cm, trainY, l, n)
-    # print("testY ", testY)
     pr = predict(svc, testX_most_cm, trainX_most_cm, l, n)
+
     total_correct = len([1 for p in zip(pr, testY) if p[0] == p[1]])
-    print("Results: {}/{} - {:.2f}%".format(total_correct, len(pr), 100*total_correct/len(pr)))
+    print("Results: {}/{} - {:.2f}%".format(total_correct, len(pr), 100 * total_correct / len(pr)))
 
-
+    write_to_file(metrics.f1_score(testY, pr))
     return pr
 
+def write_to_file(F1):
+    f = open('resultFile.txt', 'a+')
+    f.write(F1 + " ")  # python will convert \n to os.linesep
+    f.close()
 
 if __name__ == "__main__":
     # reuters.download()
 
     # textClassify()
-    print(textClassify('acq', 'corn'))
-    #print("DONE")
-    #cProfile.run('textClassify("acq", "corn")')
+    print("With approx ", textClassify('acq', 'corn'))
+    # print("Without approx", train_without_aprrx('acq', 'corn'))
+
+    # print("DONE")
+    # cProfile.run('textClassify("acq", "corn")')
