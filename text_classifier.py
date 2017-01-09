@@ -6,52 +6,30 @@ from subset_creator import *
 import cProfile
 import time
 
-
-def Sorting(corpus):
-    """
-    n = length of string/word needed for subset
-    x = how many most frequently occuring n length words
-    inputfile = dataset used for algorithm
-    
-    Returns a list of x most frequently occuring n length caracters in a file
-    """
-    # f=open(inputfile,'r')
-    # S=corpus.lower()
-    mapping = [('.', ''), (',', ''), ('?', ''), ('!', ''), ('%', ''), ('\n', ''), ('\t', '')]
-    for corp in corpus:
-        S = corp.lower()
-        for i, j in mapping:
-            S = S.replace(i, j)
-    return S
-
-
 # build kernel matrix of string list s and string list t with ssk
 def buildGramMat(sList, tList, l, n):
     # slist = train
     # tlist = test
     lenS = len(sList)
     lenT = len(tList)
-    gramMat = np.zeros((lenS, lenT), dtype=np.float64)
-    gramMat[:] = -1  # fyller med -1or
-
     # optimize calculation of kernel gram matrix when sList equals to tList
     # in our case, this is to save calculation for kernel gram matrix of training data
     if sList is tList:  # sList is the same object as tList
+        k=1
+        gramMat=np.eye(lenS,lenT,dtype=np.float64)
         for i in range(lenS):
-            for j in range(lenT):
-                if i == j:
-                    gramMat[i][j] = 1
-                    #print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
-                elif gramMat[i][j] == -1:
-                    gramMat[i][j] = gramMat[j][i] = normalize(sList[i], tList[j], l,
-                                                              n)  # here to calculate the ssk value
+            for j in range(k,lenT):
+                gramMat[i][j] = gramMat[j][i] = normalize(sList[i], tList[j], l,n)
+            k+=1  # here to calculate the ssk value
                     #print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
                     # without the two list equal to one another, we have to calculate every element for gram matrix
                 # in our case, this is for kernel gram matrix of training data and test data
     else:
-        for i in range(lenS):
+        gramMat=np.zeros((lenS,lenT),dtype=np.float64)
+        for i in range(k,lenS):
             for j in range(lenT):
                 gramMat[i][j] = normalize(sList[i], tList[j], l, n)  # here to calculate the ssk value
+                
                 # print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
 
     return gramMat
@@ -84,6 +62,7 @@ def textClassify(cat1, cat2):
     n = 2
     l = 0.5
     word_frqu = 3
+    word_len= 6
 
     # train the SVC using reuters datasets
     a_train, a_test = get_documents(cat1)
@@ -91,7 +70,7 @@ def textClassify(cat1, cat2):
     testX = create_corpus(a_test + b_test)
     trainX = create_corpus(a_train + b_train)
 
-    trainX_most_cm, testX_most_cm = most_common(n, word_frqu, trainX, testX)
+    trainX_most_cm, testX_most_cm = most_common(word_len, word_frqu, trainX, testX)
 
     trainY = [cat1] * len(a_train) + [cat2] * len(b_train)  # lista av orden acq och en lista av "corn"
     testY = [cat1] * len(a_test) + [cat2] * len(b_train)  # skapar testdata
@@ -102,8 +81,7 @@ def textClassify(cat1, cat2):
 
 if __name__ == "__main__":
     # reuters.download()
-
-    textClassify('acq', 'corn')
-    print(textClassify('acq', 'corn'))
+    print(textClassify('crude', 'corn'))
     print("DONE")
-    Profile.run('textClassify()')
+    cProfile.run('textClassify()')
+    
