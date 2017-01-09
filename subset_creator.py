@@ -13,55 +13,48 @@ Example:
 Author: Fabian Huss
 """
 
-def acquire_list(category):
-    """
-    Acquires corpus from reuters dataset and returns as list of strings
-    """
-    train_data=create_corpus(get_documents(category)[0])
-    test_data=create_corpus(get_documents(category)[1])
-    
-    test=[]
-    train=[]
-    
-    ltrain=len(train_data)
-    ltest=len(test_data)
-    
-    for i in range(ltrain):
-        train.append(re.sub('[^a-z ]+', '', train_data[i]))
-    for j in range(ltrain):
-        train[j]=train[j].split()
-    for i in range(ltest):
-        test.append(re.sub('[^a-z ]+', '', test_data[i]))
-    for j in range(ltest):
-        test[j]=test[j].split()
-    return train,test
-
-def sorting(n,category):
+def sorting(n,training, testing):
     """
     n: length of string/word for subset
     category: which category in reuters to be used
     
-    Returns a list of x most frequently occuring n length caracters in a file
+    Returns a list of x most frequently occuring n length characters in a file
     """
-    train,test = acquire_list(category)
     
+    ltrain=len(training)
+    ltest=len(testing)
     train_sub=[]
     test_sub=[]
-    ltrain=len(train)
-    ltest=len(test)
+    test=[]
+    train=[]
     for i in range(ltrain):
-        train_sub.append([s for s in train[i] if len(s)==n])
+        train.append(training[i].split())
     for j in range(ltest):
+        test.append(testing[j].split())
+    
+    for i in range(len(train)):
+        train_sub.append([s for s in train[i] if len(s)==n])
+    for j in range(len(test)):
         test_sub.append([s for s in test[j] if len(s)==n])
     
     return train_sub, test_sub
 
-def most_common(n,x,category):
+def list_to_string(train,test):
+    
+    training=[]
+    testing=[]
+    for i in range(len(train)):
+        training.append(' '.join(train[i]))
+    for j in range(len(test)):
+        testing.append(' '.join(test[j]))
+    return training, testing
+
+def most_common(n,x,train,test):
     """
     x: how many most frequently occurring n length words
     
     """
-    train, test =sorting(n,category)
+    train, test = sorting(n,train, test)
     
     train_cmn=[]
     test_cmn=[]
@@ -80,8 +73,12 @@ def most_common(n,x,category):
         train_cmn[i]=[x[0] for x in train_cmn[i]]
     for j in range(ltest):
         test_cmn[j]=[x[0] for x in test_cmn[j]]
-        
+    
+    train_cmn,test_cmn=list_to_string(train_cmn,test_cmn)
+    
         
     return train_cmn,test_cmn
+    
+
     
     
