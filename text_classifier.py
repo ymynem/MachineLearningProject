@@ -63,11 +63,9 @@ def partition(dataset, fraction):
 
 
 # retrieve and clean reuters data, wrap up method of train and predict
-def textClassify(cat1, cat2,  n , l ):
-
+def textClassify(cat1, cat2, n, l):
     word_frqu = 3
     len_of_word = 5
-
 
     # train the SVC using reuters datasets
     a_train, a_test = get_documents(cat1)
@@ -109,7 +107,8 @@ def calculate_table_values(testY, pr):
 
 def write_to_file(f1_score, precision, recall, optional):
     f = open('resultFile.txt', 'a+')
-    f.write(str(f1_score) + " " + str(precision) + " " + str(recall) +  str(optional) +"\n" )  # python will convert \n to os.linesep
+    f.write(str(f1_score) + " " + str(precision) + " " + str(recall) + str(
+        optional) + "\n")  # python will convert \n to os.linesep
     f.close()
 
 
@@ -125,7 +124,7 @@ if __name__ == "__main__":
 
     write_to_file("Subseqlength = " + str(n), " Lambda = " + str(l), " Category1 = " + cat1, " Category2 = " + cat2)
 
-    while(iter < 2):
-        textClassify(cat1, cat2 , n, l)
+    while (iter < 2):
+        textClassify(cat1, cat2, n, l)
         iter = iter + 1
-    # cProfile.run('textClassify("acq", "corn")')
+        # cProfile.run('textClassify("acq", "corn")')
