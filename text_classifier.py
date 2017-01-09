@@ -26,7 +26,7 @@ def buildGramMat(sList, tList, l, n):
                 # in our case, this is for kernel gram matrix of training data and test data
     else:
         gramMat=np.zeros((lenS,lenT),dtype=np.float64)
-        for i in range(k,lenS):
+        for i in range(lenS):
             for j in range(lenT):
                 gramMat[i][j] = normalize(sList[i], tList[j], l, n)  # here to calculate the ssk value
                 
