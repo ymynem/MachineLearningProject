@@ -63,9 +63,7 @@ def partition(dataset, fraction):
 
 
 # retrieve and clean reuters data, wrap up method of train and predict
-def textClassify(cat1, cat2):
-    n = 2
-    l = 0.5
+def textClassify(cat1, cat2, n, l):
     word_frqu = 3
     len_of_word = 5
 
@@ -95,20 +93,38 @@ def textClassify(cat1, cat2):
     total_correct = len([1 for p in zip(pr, testY) if p[0] == p[1]])
     print("Results: {}/{} - {:.2f}%".format(total_correct, len(pr), 100 * total_correct / len(pr)))
 
-    write_to_file(metrics.f1_score(testY, pr))
+    precision, recall, f1_score = calculate_table_values(testY, pr)
+    write_to_file(precision, recall, f1_score, " ")
     return pr
 
-def write_to_file(F1):
+
+def calculate_table_values(testY, pr):
+    precision = metrics.precision_score(testY, pr, average='macro')
+    recall = metrics.recall_score(testY, pr, average='macro')
+    f1_score = metrics.f1_score(testY, pr, average='macro')
+    return precision, recall, f1_score
+
+
+def write_to_file(f1_score, precision, recall, optional):
     f = open('resultFile.txt', 'a+')
-    f.write(F1 + " ")  # python will convert \n to os.linesep
+    f.write(str(f1_score) + " " + str(precision) + " " + str(recall) + str(
+        optional) + "\n")  # python will convert \n to os.linesep
     f.close()
+
 
 if __name__ == "__main__":
     # reuters.download()
 
     # textClassify()
-    print("With approx ", textClassify('acq', 'corn'))
-    # print("Without approx", train_without_aprrx('acq', 'corn'))
+    iter = 0
+    n = 2
+    l = 0.5
+    cat1 = 'acq'
+    cat2 = 'corn'
 
-    # print("DONE")
-    # cProfile.run('textClassify("acq", "corn")')
+    write_to_file("Subseqlength = " + str(n), " Lambda = " + str(l), " Category1 = " + cat1, " Category2 = " + cat2)
+
+    while (iter < 2):
+        textClassify(cat1, cat2, n, l)
+        iter = iter + 1
+        # cProfile.run('textClassify("acq", "corn")')
