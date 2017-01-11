@@ -1,2 +1,7 @@
 *.py[oc]
+.idea/
 
+.settings/
+.pydevproject
+.project
+__pychache__/
