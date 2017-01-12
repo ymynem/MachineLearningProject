@@ -1,11 +1,11 @@
 import numpy as np
-from ssk_by_Mona import normalize
 from sklearn import svm, metrics
 from reuters import *
 from subset_creator import *
 import cProfile
 import time
 import random
+from ssk import ssk
 
 
 # build kernel matrix of string list s and string list t with ssk
@@ -21,16 +21,17 @@ def buildGramMat(sList, tList, l, n):
         gramMat = np.eye(lenS, lenT, dtype=np.float64)
         for i in range(lenS):
             for j in range(k, lenT):
-                gramMat[i][j] = gramMat[j][i] = normalize(sList[i], tList[j], l, n)
+                gramMat[i][j] = gramMat[j][i] = ssk(sList[i], tList[j], n, l)
             k += 1  # here to calculate the ssk value
             # print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
             # without the two list equal to one another, we have to calculate every element for gram matrix
             # in our case, this is for kernel gram matrix of training data and test data
+            print("line", i)
     else:
         gramMat = np.zeros((lenS, lenT), dtype=np.float64)
         for i in range(lenS):
             for j in range(lenT):
-                gramMat[i][j] = normalize(sList[i], tList[j], l, n)  # here to calculate the ssk value
+                gramMat[i][j] = ssk(sList[i], tList[j], n, l)  # here to calculate the ssk value
 
                 # print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
 

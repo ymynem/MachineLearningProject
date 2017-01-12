@@ -1,19 +1,18 @@
 from reuters import *
-from random import shuffle, seed
+from random import Random
 from collections import defaultdict
 
 
-seed(0)  # So everybody gets the same bulks
-
-
-def get_data(categories):
+def get_data(categories, seed=0):
     cats = {}
-    for key, value in categories.items():
-        train, test = get_documents(key)
-        shuffle(train)
-        shuffle(test)
-        cats[key] = [create_corpus(train[:value[0]]), create_corpus(test[:value[1]])]
     data = defaultdict(lambda: {"x": [], "y": []})
+    data["categories"] = []
+    for key, value in categories.items():
+        data["categories"].append(key)
+        train, test = get_documents(key)
+        Random(seed).shuffle(train)
+        Random(seed).shuffle(test)
+        cats[key] = [create_corpus(train[:value[0]]), create_corpus(test[:value[1]])]
     for key, value in cats.items():
         data["train"]["x"].extend(value[0])
         data["train"]["y"].extend([key]*len(value[0]))
@@ -22,10 +21,19 @@ def get_data(categories):
     return data
 
 
+def get_bulks(n, COUNTS):
+    bulks = []
+    for i in range(n):
+        bulks.append(get_data(COUNTS, seed=i+10))
+
+#    print(bulks[0]["train"]["x"][0].split(" ")[0])
+    return bulks
+
+
 SIMPLE_DATA_BULK_COUNT = 10
-SIMPLE_DATA = [get_data({
+SIMPLE_DATA = get_bulks(SIMPLE_DATA_BULK_COUNT, {
         "earn" : (152, 40),
         "acq"  : (114, 25),
         "crude": (76, 15),
         "corn" : (38, 10),
-    }) for i in range(SIMPLE_DATA_BULK_COUNT)]
+    })

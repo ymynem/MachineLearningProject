@@ -3,6 +3,7 @@ import argparse
 from sklearn import svm
 
 from reuters import *
+from utils import get_table_values
 
 
 """
@@ -18,47 +19,41 @@ Author: Þorsteinn Daði Gunnarsson
 """
 
 
-def train_and_test_classifier(cat1, cat2, method, n=2):
-    # Get document ids
-    a_train, a_test = get_documents(cat1)
-    b_train, b_test = get_documents(cat2)
+def train_and_test_classifier(datasets, method, n=2):
+    ys, pr = [], []
 
-    print("Number of documents:", len(a_train), len(b_train))
+    for data in datasets:
+        train = data["train"]
+        test = data["test"]
+  
+        if method == "bow":
+            vectorizer, X = get_bow(train["x"])
+        elif method == "ngram":
+            vectorizer, X = get_ngram(train["x"], n)
 
-    train_data = create_corpus(a_train + b_train)
-    y = [cat1]*len(a_train) + [cat2]*len(b_train)
+        clf = svm.SVC(decision_function_shape="ovr")
+        clf.fit(X, train["y"])  # Train classifier
 
-    if method == "bow":
-        vectorizer, X = get_bow(train_data)
-    elif method == "ngram":
-        vectorizer, X = get_ngram(train_data, n)
+        ys.append(test["y"])
+        pr.append(clf.predict(vectorizer.transform(test["x"]).toarray()))
 
-    clf = svm.SVC()
-    clf.fit(X, y)  # Train classifier
-
-    print("Number of support vectors:", clf.n_support_)
-
-    test_corpus = create_corpus(a_test + b_test)
-
-    X_test = vectorizer.transform(test_corpus).toarray()
-    y_test = [cat1]*len(a_test) + [cat2]*len(b_test)
-
-    pr = clf.predict(X_test)
-    total_correct = len([1 for p in zip(pr, y_test) if p[0] == p[1]])
-    print("Results: {}/{} - {:.2f}%".format(total_correct, len(pr), 100*total_correct/len(pr)))
+    stats = get_table_values(data["categories"], ys, pr)
+    keys = ["F1", "precision", "recall"]
+    print("{:10} {:20} {:20} {:20}".format(*(["Category"] + keys)))
+    for cat in data["categories"]:
+        values = stats[cat]
+        print("{:10} {:20} {:20} {:20}".format(*([cat] + ["{:.3f} ({:.3f})".format(*values[k]) for k in keys])))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Classify categories from Reuters dataset with a SVM")
-    parser.add_argument("Category 1", help="The first categury to classify")
-    parser.add_argument("Category 2", help="The second categury to classify")
     parser.add_argument("Vectorizer", help="What method to use to vectorize strings ", choices=["bow", "ngram"])
     parser.add_argument("-n", type=int, help="N", default=2)
+    parser.add_argument("-i", type=int, help="Dataset", default=1)
     parser.add_argument("-d", "--download", action="store_true", help="Downloads all data needed")
     res = vars(parser.parse_args())
 
-    cat1 = res["Category 1"]
-    cat2 = res["Category 2"]
+    i = res["i"]
     method = res["Vectorizer"]
     n = res["n"]
 
@@ -67,9 +62,11 @@ if __name__ == "__main__":
     elif method == "ngram":
         method_name = "ngram (n={})".format(n)
 
-    print("Classifying {} and {} using {}".format(cat1, cat2, method_name)) 
+    print("Classifying dataset {} using {}".format(i, method_name)) 
 
     if res["download"]:
         download()
-    train_and_test_classifier(cat1, cat2, method, n=n)
+
+    from simple_data import SIMPLE_DATA
+    train_and_test_classifier(SIMPLE_DATA[:i], method, n=n)
 
