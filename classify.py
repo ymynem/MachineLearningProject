@@ -11,8 +11,8 @@ Classification for bag of words and ngram.
 Use -d or --download for the first time to load all the data.
 
 Example use:
-  python3 classify.py acq corn bow
-  python3 classify.py acq corn ngram -n 3
+  python3 classify.py bow -i 10
+  python3 classify.py ngram -n 3 -i 10
 
 
 Author: Þorsteinn Daði Gunnarsson
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     elif method == "ngram":
         method_name = "ngram (n={})".format(n)
 
-    print("Classifying dataset {} using {}".format(i, method_name)) 
+    print("Classifying i={} datasets using {}".format(i, method_name)) 
 
     if res["download"]:
         download()
