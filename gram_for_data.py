@@ -1,8 +1,8 @@
-import json
 import argparse
 
 from text_classifier import buildGramMat as bgm
-from simple_data import SIMPLE_DATA
+from simple_data import VERY_SIMPLE_DATA
+from utils import load_data, write_data
 
 
 def get_gram_matrices(x, y, n, l):
@@ -13,24 +13,38 @@ def get_gram_matrices(x, y, n, l):
     return X, Y
 
 
+def _get_gram_file_name(i, n, l):
+    return "grams/gram-{}-n{}-l{}.json".format(i, n, l)
+
+
 def write_gram_to_file(i, n, l, X, Y):
-    data = {"i": i, "n": n, "l": l, "X": X, "Y": Y}
-    with open("grams/gram-{}-n{}-l{}.json", "w") as outfile:
-        json.dump(data, outfile)
+    data = {"i": i, "n": n, "l": l, "X": X.tolist(), "Y": Y.tolist()}
+    write_data(_get_gram_file_name(i, n, l), data)
 
 
-def save_grams_to_file(n, l):
-    for i, d in zip(range(len(SIMPLE_DATA)), SIMPLE_DATA):
+def read_gram_from_file(i, n, l):
+    data = load_data(_get_gram_file_name(i, n, l))
+    return data
+
+
+def save_grams_to_file(i, n, l):
+    if i >= 0:
+        ds = [VERY_SIMPLE_DATA[i]]
+    else:
+        ds = VERY_SIMPLE_DATA
+
+    for i, d in zip(range(len(ds)), ds):
         X, Y = get_gram_matrices(d["train"]["x"], d["test"]["x"], n, l)
         write_gram_to_file(i, n, l, X, Y)
-        print(i, "Done")
+        print("Done")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Compute and save gram matrices for SIMPLE_DATA")
     parser.add_argument("n", type=int)
     parser.add_argument("l", type=float)
+    parser.add_argument("-i", type=int, default=-1)
 
     res = parser.parse_args()
-    save_grams_to_file(res.n, res.l)
+    save_grams_to_file(res.i, res.n, res.l)
 

@@ -5,7 +5,7 @@ from subset_creator import *
 import cProfile
 import time
 import random
-from ssk import ssk
+from ssk import ssk, kh
 
 
 # build kernel matrix of string list s and string list t with ssk
@@ -19,19 +19,34 @@ def buildGramMat(sList, tList, l, n):
     if sList is tList:  # sList is the same object as tList
         k = 1
         gramMat = np.eye(lenS, lenT, dtype=np.float64)
+
+        sames = []
         for i in range(lenS):
+            sames.append(kh(sList[i], sList[i], n, l))
+        samet = sames
+
+        for i in range(lenS):
+            print("Starting line", i)
             for j in range(k, lenT):
-                gramMat[i][j] = gramMat[j][i] = ssk(sList[i], tList[j], n, l)
+                gramMat[i][j] = gramMat[j][i] = ssk(sList[i], tList[j], n, l, ss=sames[i], tt=samet[j])
             k += 1  # here to calculate the ssk value
             # print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
             # without the two list equal to one another, we have to calculate every element for gram matrix
             # in our case, this is for kernel gram matrix of training data and test data
-            print("line", i)
     else:
         gramMat = np.zeros((lenS, lenT), dtype=np.float64)
+
+        sames = []
         for i in range(lenS):
+            sames.append(kh(sList[i], sList[i], n, l))
+        samet = []
+        for i in range(lenT):
+            samet.append(kh(tList[i], tList[i], n, l))
+
+        for i in range(lenS):
+            print("Starting line", i)
             for j in range(lenT):
-                gramMat[i][j] = ssk(sList[i], tList[j], n, l)  # here to calculate the ssk value
+                gramMat[i][j] = ssk(sList[i], tList[j], n, l, ss=sames[i], tt=samet[j])  # here to calculate the ssk value
 
                 # print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
 

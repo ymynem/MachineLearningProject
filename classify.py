@@ -36,6 +36,7 @@ def train_and_test_classifier(datasets, method, n=2):
 
         ys.append(test["y"])
         pr.append(clf.predict(normalize(vectorizer.transform(test["x"]).toarray())))
+
     stats = get_table_values(data["categories"], ys, pr)
     keys = ["F1", "precision", "recall"]
     print("{:10} {:20} {:20} {:20}".format(*(["Category"] + keys)))

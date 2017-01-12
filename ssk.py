@@ -2,7 +2,7 @@ from math import sqrt
 from functools import lru_cache
 
 import sys
-sys.setrecursionlimit(10000)  # This is bad practice
+sys.setrecursionlimit(20000)  # This is bad practice
 
 
 @lru_cache(maxsize=None)
@@ -36,7 +36,9 @@ def kh(s, t, n, l):
 
     return k(n, len(s), len(t))
 
-def ssk(s, t, n, l):
+def ssk(s, t, n, l, ss=None, tt=None):
+    if ss and tt:
+        return kh(s, t, n, l) / sqrt(ss*tt)
     return kh(s, t, n, l) / sqrt(kh(s, s, n, l) * kh(t, t, n, l))
 
 
