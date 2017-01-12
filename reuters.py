@@ -1,8 +1,8 @@
 import nltk
-#NLTK
-from sklearn.feature_extraction.text import CountVectorizer
-
 from nltk.corpus import reuters, stopwords
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
 
 
 def download():
@@ -62,14 +62,19 @@ def create_corpus(fileids):
     return corpus
 
 
+def normalize(counts):
+    transformer = TfidfTransformer(smooth_idf=1)
+    return transformer.fit_transform(counts).toarray()
+
+
 def get_ngram(corpus, n):
     ngram = CountVectorizer(analyzer="char", ngram_range=(n, n), min_df=1)
     counts = ngram.fit_transform(corpus)
-    return ngram, counts.toarray().astype(int)
+    return ngram, normalize(counts.toarray())
 
 
 def get_bow(corpus):
     v = CountVectorizer(analyzer="word", min_df=1)
     bow = v.fit_transform(corpus)
-    return v, bow.toarray()
+    return v, normalize(bow.toarray())
 

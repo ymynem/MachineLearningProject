@@ -31,12 +31,11 @@ def train_and_test_classifier(datasets, method, n=2):
         elif method == "ngram":
             vectorizer, X = get_ngram(train["x"], n)
 
-        clf = svm.SVC(decision_function_shape="ovr")
+        clf = svm.LinearSVC(multi_class="ovr")
         clf.fit(X, train["y"])  # Train classifier
 
         ys.append(test["y"])
-        pr.append(clf.predict(vectorizer.transform(test["x"]).toarray()))
-
+        pr.append(clf.predict(normalize(vectorizer.transform(test["x"]).toarray())))
     stats = get_table_values(data["categories"], ys, pr)
     keys = ["F1", "precision", "recall"]
     print("{:10} {:20} {:20} {:20}".format(*(["Category"] + keys)))
