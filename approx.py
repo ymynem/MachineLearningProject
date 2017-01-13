@@ -2,6 +2,8 @@ import numpy as np
 from ssk import ssk
 from itertools import product
 from collections import defaultdict
+from random import shuffle
+
 
 def enumerate_substring(s, alphabet):
     """
@@ -33,7 +35,7 @@ def approx_ssk(s, t, n, l, S):
     return sum(ssk(s, si, n, l)*ssk(t, si, n, l) for si in S)
 
 
-def get_top_S(corpus, n, count=200, alphabet="abcdefghijklmnopqrstuvwxyz "):
+def get_S_from_corpus(corpus, n, alphabet="abcdefghijklmnopqrstuvwxyz "):
     fs = defaultdict(lambda: 0)
     for d in corpus:
         for i in range(len(d)-n):
@@ -41,10 +43,28 @@ def get_top_S(corpus, n, count=200, alphabet="abcdefghijklmnopqrstuvwxyz "):
             index = d[i:i+n]
             fs[index] += 1
     
-    fs_list = [(k, v) for k, v in fs.items()]
+    return [(k, v) for k, v in fs.items()]
+
+
+def get_top_S(corpus, n, count=200, alphabet="abcdefghijklmnopqrstuvwxyz "):
+    fs_list = get_S_from_corpus(corpus, n)
     fs_list.sort(key=lambda p: p[1], reverse=True)  # Sort after count
-    top_arg = [p[0] for p in fs_list[:count]]
-    return top_arg
+    subs = [p[0] for p in fs_list[:count]]
+    return subs
+
+
+def get_worst_S(corpus, n, count=200, alphabet="abcdefghijklmnopqrstuvwxyz "):
+    fs_list = get_S_from_corpus(corpus, n)
+    fs_list.sort(key=lambda p: p[1], reverse=False)  # Sort after count
+    subs = [p[0] for p in fs_list[:count]]
+    return subs
+
+
+def get_random_S(corpus, n, count=200, alphabet="abcdefghijklmnopqrstuvwxyz "):
+    fs_list = get_S_from_corpus(corpus, n)
+    shuffle(fs_list)
+    subs = [p[0] for p in fs_list[:count]]
+    return subs
 
 
 if __name__ == "__main__":
