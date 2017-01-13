@@ -47,7 +47,7 @@ def get_documents(category):
     return training_ids(docs), test_ids(docs)
 
 
-def create_corpus(fileids):
+def create_corpus(fileids, max_length=None):
     """
     Creates a corpus from fileids
     Removes stopwords and punctuation
@@ -58,7 +58,10 @@ def create_corpus(fileids):
     corpus = []
     for doc in fileids:
         words = (w.lower() for w in tokenizer.tokenize(reuters.raw(doc)))
-        corpus.append(" ".join(w for w in words if w not in sw))
+        words = [w for w in words if w not in sw]
+        if max_length:
+            words = words[:max_length]
+        corpus.append(" ".join(words))
     return corpus
 
 

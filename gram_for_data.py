@@ -1,7 +1,7 @@
 import argparse
 
-from text_classifier import buildGramMat as bgm
-from simple_data import VERY_SIMPLE_DATA
+from bgm import build_gram_matrix as bgm
+from simple_data import VERY_SIMPLE_DATA, DATA
 from utils import load_data, write_data
 
 
@@ -9,7 +9,7 @@ def get_gram_matrices(x, y, n, l):
     print("starting x, x", len(x))
     X = bgm(x, x, l, n)
     print("starting x, y", len(x), len(y))
-    Y = bgm(x, y, l, n)
+    Y = bgm(y, x, l, n)
     return X, Y
 
 
@@ -29,9 +29,9 @@ def read_gram_from_file(i, n, l):
 
 def save_grams_to_file(i, n, l):
     if i >= 0:
-        ds = [VERY_SIMPLE_DATA[i]]
+        ds = [DATA[i]]
     else:
-        ds = VERY_SIMPLE_DATA
+        ds = DATA
 
     for i, d in zip(range(len(ds)), ds):
         X, Y = get_gram_matrices(d["train"]["x"], d["test"]["x"], n, l)

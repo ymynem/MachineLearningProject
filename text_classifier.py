@@ -1,6 +1,6 @@
-import numpy as np
-from sklearn import svm, metrics
-from reuters import *
+#import numpy as np
+#from sklearn import svm, metrics
+#from reuters import *
 from subset_creator import *
 import cProfile
 import time
@@ -18,7 +18,10 @@ def buildGramMat(sList, tList, l, n):
     # in our case, this is to save calculation for kernel gram matrix of training data
     if sList is tList:  # sList is the same object as tList
         k = 1
-        gramMat = np.eye(lenS, lenT, dtype=np.float64)
+        #gramMat = np.eye(lenS, lenT, dtype=np.float64)
+        gramMat = []
+        for i in range(lenS):
+            gramMat.append([1]*lenT)
 
         sames = []
         for i in range(lenS):
@@ -34,7 +37,10 @@ def buildGramMat(sList, tList, l, n):
             # without the two list equal to one another, we have to calculate every element for gram matrix
             # in our case, this is for kernel gram matrix of training data and test data
     else:
-        gramMat = np.zeros((lenS, lenT), dtype=np.float64)
+#        gramMat = np.zeros((lenS, lenT), dtype=np.float64)
+        gramMat = []
+        for i in range(lenS):
+            gramMat.append([1]*lenT)
 
         sames = []
         for i in range(lenS):

@@ -12,7 +12,10 @@ def get_data(categories, seed=0):
         train, test = get_documents(key)
         Random(seed).shuffle(train)
         Random(seed).shuffle(test)
-        cats[key] = [create_corpus(train[:value[0]]), create_corpus(test[:value[1]])]
+        MAX_LENGTH = 100
+        cats[key] = [
+            create_corpus(train[:value[0]], max_length=MAX_LENGTH), 
+            create_corpus(test[:value[1]], max_length=MAX_LENGTH)]
     for key, value in cats.items():
         data["train"]["x"].extend(value[0])
         data["train"]["y"].extend([key]*len(value[0]))
@@ -46,3 +49,10 @@ VERY_SIMPLE_DATA = get_bulks(10, {
         "corn" : (38, 10),
     })
        
+DATA = get_bulks(10, {
+        "earn" : (25, 8),
+        "acq"  : (25, 8),
+        "crude": (25, 8),
+        "corn" : (25, 8),
+    })
+
