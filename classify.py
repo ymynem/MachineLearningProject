@@ -26,24 +26,24 @@ Author: Þorsteinn Daði Gunnarsson
 def train_and_test_classifier(datasets, method, n=None, l=None):
     ys, pr = [], []
 
-    for data in datasets:
+    for i, data in enumerate(datasets):
         train = data["train"]
         test = data["test"]
  
         if method == "ssk":
             clf = svm.SVC(kernel="precomputed")
             try:
-                d = read_gram_from_file(100, n, l)
+                d = read_gram_from_file(i, n, l)
                 X = d["X"]
                 Y = d["Y"]
             except IOError:
-                S = get_top_S(train["x"], n, count=10)
+                S = get_top_S(train["x"], n, count=200)
                 K = get_K(S)
                 x = train["x"]
                 X = bgm(x, x, l, n, K=K)
                 y = test["x"]
                 Y = bgm(y, x, l, n, K=K)
-                write_gram_to_file(0, n, l, X, Y)
+                write_gram_to_file(i, n, l, X, Y)
         else: 
             if method == "bow":
                 vectorizer, X = get_bow(train["x"])
@@ -54,7 +54,6 @@ def train_and_test_classifier(datasets, method, n=None, l=None):
 #            clf = svm.SVC(decision_function_shape="ovr")
             Y = normalize(vectorizer.transform(test["y"]).toarray())
         clf.fit(X, train["y"])  # Train classifier
-
         ys.append(test["y"])
         pr.append(clf.predict(Y))
 
@@ -92,6 +91,6 @@ if __name__ == "__main__":
     if res["download"]:
         download()
 
-    from simple_data import DATA as DATA
+    from simple_data import SIMPLE_DATA as DATA
     train_and_test_classifier(DATA[:i], method, n=n, l=l)
 
