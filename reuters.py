@@ -1,8 +1,8 @@
 import nltk
-#NLTK
-from sklearn.feature_extraction.text import CountVectorizer
-
 from nltk.corpus import reuters, stopwords
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
 
 
 def download():
@@ -47,7 +47,7 @@ def get_documents(category):
     return training_ids(docs), test_ids(docs)
 
 
-def create_corpus(fileids):
+def create_corpus(fileids, max_length=None):
     """
     Creates a corpus from fileids
     Removes stopwords and punctuation
@@ -58,18 +58,26 @@ def create_corpus(fileids):
     corpus = []
     for doc in fileids:
         words = (w.lower() for w in tokenizer.tokenize(reuters.raw(doc)))
-        corpus.append(" ".join(w for w in words if w not in sw))
+        words = [w for w in words if w not in sw]
+        if max_length:
+            words = words[:max_length]
+        corpus.append(" ".join(words))
     return corpus
+
+
+def normalize(counts):
+    transformer = TfidfTransformer(smooth_idf=1)
+    return transformer.fit_transform(counts).toarray()
 
 
 def get_ngram(corpus, n):
     ngram = CountVectorizer(analyzer="char", ngram_range=(n, n), min_df=1)
     counts = ngram.fit_transform(corpus)
-    return ngram, counts.toarray().astype(int)
+    return ngram, normalize(counts.toarray())
 
 
 def get_bow(corpus):
     v = CountVectorizer(analyzer="word", min_df=1)
     bow = v.fit_transform(corpus)
-    return v, bow.toarray()
+    return v, normalize(bow.toarray())
 

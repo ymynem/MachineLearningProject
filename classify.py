@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 import argparse
 from sklearn import svm
+import numpy as np
 
 from reuters import *
+from utils import get_table_values
+from bgm import build_gram_matrix as bgm
+from gram_for_data import write_gram_to_file, read_gram_from_file
+from approx import get_K, get_S, get_top_S
+from ssk import ssk
 
 
 """
@@ -10,66 +16,88 @@ Classification for bag of words and ngram.
 Use -d or --download for the first time to load all the data.
 
 Example use:
-  python3 classify.py acq corn bow
-  python3 classify.py acq corn ngram -n 3
-
+  python3 classify.py bow -i 10
+  python3 classify.py ngram -n 3 -i 10
+  python3 classify.py ssk -n 2 -l 0.5 -i 1
 
 Author: Þorsteinn Daði Gunnarsson
 """
 
 
-def train_and_test_classifier(cat1, cat2, method, n=2):
-    # Get document ids
-    a_train, a_test = get_documents(cat1)
-    b_train, b_test = get_documents(cat2)
+def train_and_test_classifier(datasets, method, n=None, l=None, approx=True):
+    ys, pr = [], []
 
-    print("Number of documents:", len(a_train), len(b_train))
+    for i, data in enumerate(datasets):
+        train = data["train"]
+        test = data["test"]
+ 
+        if method == "ssk":
+            clf = svm.SVC(kernel="precomputed")
+            try:
+                d = read_gram_from_file(i, n, l, comment="" if approx else "no-approx")
+                X = d["X"]
+                Y = d["Y"]
+            except IOError:
+                if approx:
+                    S = get_top_S(train["x"], n, count=200)
+                    K = get_K(S)
+                else:
+                    K = ssk
+                x = train["x"]
+                X = bgm(x, x, l, n, K=K)
+                y = test["x"]
+                Y = bgm(y, x, l, n, K=K)
+                write_gram_to_file(i, n, l, X, Y)
+        else: 
+            if method == "bow":
+                vectorizer, X = get_bow(train["x"])
+            elif method == "ngram":
+                vectorizer, X = get_ngram(train["x"], n)
 
-    train_data = create_corpus(a_train + b_train)
-    y = [cat1]*len(a_train) + [cat2]*len(b_train)
+            clf = svm.LinearSVC(multi_class="ovr")
+#            clf = svm.SVC(decision_function_shape="ovr")
+            Y = normalize(vectorizer.transform(test["y"]).toarray())
+        clf.fit(X, train["y"])  # Train classifier
+        ys.append(test["y"])
+        pr.append(clf.predict(Y))
 
-    if method == "bow":
-        vectorizer, X = get_bow(train_data)
-    elif method == "ngram":
-        vectorizer, X = get_ngram(train_data, n)
-
-    clf = svm.SVC()
-    clf.fit(X, y)  # Train classifier
-
-    print("Number of support vectors:", clf.n_support_)
-
-    test_corpus = create_corpus(a_test + b_test)
-
-    X_test = vectorizer.transform(test_corpus).toarray()
-    y_test = [cat1]*len(a_test) + [cat2]*len(b_test)
-
-    pr = clf.predict(X_test)
-    total_correct = len([1 for p in zip(pr, y_test) if p[0] == p[1]])
-    print("Results: {}/{} - {:.2f}%".format(total_correct, len(pr), 100*total_correct/len(pr)))
+    stats = get_table_values(datasets[0]["categories"], ys, pr)
+    keys = ["F1", "precision", "recall"]
+    print("{:10} {:20} {:20} {:20}".format(*(["Category"] + keys)))
+    for cat in data["categories"]:
+        values = stats[cat]
+        print("{:10} {:20} {:20} {:20}".format(*([cat] + ["{:.3f} ({:.3f})".format(*values[k]) for k in keys])))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Classify categories from Reuters dataset with a SVM")
-    parser.add_argument("Category 1", help="The first categury to classify")
-    parser.add_argument("Category 2", help="The second categury to classify")
-    parser.add_argument("Vectorizer", help="What method to use to vectorize strings ", choices=["bow", "ngram"])
+    parser.add_argument("Vectorizer", help="What method to use to vectorize strings ", choices=["bow", "ngram", "ssk"])
     parser.add_argument("-n", type=int, help="N", default=2)
+    parser.add_argument("-l", type=float, help="l", default=0.5)
+    parser.add_argument("-i", type=int, help="Dataset", default=1)
+    parser.add_argument("-A", "--noapprox", action="store_false", help="Don't use approximate ssk")
     parser.add_argument("-d", "--download", action="store_true", help="Downloads all data needed")
     res = vars(parser.parse_args())
 
-    cat1 = res["Category 1"]
-    cat2 = res["Category 2"]
+    i = res["i"]
     method = res["Vectorizer"]
     n = res["n"]
+    l = res["l"]
+    approx = res["noapprox"]
+    print(approx)
 
     if method == "bow":
         method_name = "bag of words"
     elif method == "ngram":
         method_name = "ngram (n={})".format(n)
+    elif method == "ssk":
+        method_name = "ssk (n={}, l={})".format(n, l)
 
-    print("Classifying {} and {} using {}".format(cat1, cat2, method_name)) 
+    print("Classifying i={} datasets using {}".format(i, method_name)) 
 
     if res["download"]:
         download()
-    train_and_test_classifier(cat1, cat2, method, n=n)
+
+    from simple_data import DATA as DATA
+    train_and_test_classifier(DATA[:i], method, n=n, l=l, approx=approx)
 
