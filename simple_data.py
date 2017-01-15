@@ -1,6 +1,7 @@
 from reuters import *
 from random import Random
 from collections import defaultdict, OrderedDict
+from subset_creator import most_common
 
 
 def get_data(categories, seed=0):
@@ -12,10 +13,13 @@ def get_data(categories, seed=0):
         train, test = get_documents(key)
         Random(seed).shuffle(train)
         Random(seed).shuffle(test)
-        MAX_LENGTH = 100
-        cats[key] = [
+        startValue = 1 
+        the_first_frequent_words = 7
+        cats[key] = [most_common(startValue, the_first_frequent_words, create_corpus(train[:value[0]])), most_common(startValue, the_first_frequent_words, create_corpus(test[:value[1]]))]
+        #MAX_LENGTH = 100
+        '''cats[key] = [
             create_corpus(train[:value[0]], max_length=MAX_LENGTH), 
-            create_corpus(test[:value[1]], max_length=MAX_LENGTH)]
+            create_corpus(test[:value[1]], max_length=MAX_LENGTH)]'''
     for key, value in cats.items():
         data["train"]["x"].extend(value[0])
         data["train"]["y"].extend([key]*len(value[0]))
