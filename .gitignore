@@ -1,6 +1,6 @@
 *.py[oc]
 .idea/
-
+grams/
 .settings/
 .pydevproject
 .project
