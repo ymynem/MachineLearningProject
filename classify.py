@@ -9,6 +9,7 @@ from bgm import build_gram_matrix as bgm
 from gram_for_data import write_gram_to_file, read_gram_from_file
 from approx import get_K, get_S, get_top_S
 from ssk import ssk
+from subset_creator import most_common
 
 
 """
@@ -33,6 +34,8 @@ def train_and_test_classifier(datasets, method, n=None, l=None, approx=True):
  
         if method == "ssk":
             clf = svm.SVC(kernel="precomputed")
+            train["x"] = most_common(n, 100, train["x"])
+            test["x"] = most_common(n, 100, test["x"])
             try:
                 d = read_gram_from_file(i, n, l, comment="" if approx else "no-approx")
                 X = d["X"]

@@ -15,11 +15,11 @@ def get_data(categories, seed=0):
         Random(seed).shuffle(test)
         startValue = 1 
         the_first_frequent_words = 7
-        cats[key] = [most_common(startValue, the_first_frequent_words, create_corpus(train[:value[0]])), most_common(startValue, the_first_frequent_words, create_corpus(test[:value[1]]))]
-        #MAX_LENGTH = 100
-        '''cats[key] = [
+        #cats[key] = [most_common(startValue, the_first_frequent_words, create_corpus(train[:value[0]])), most_common(startValue, the_first_frequent_words, create_corpus(test[:value[1]]))]
+        MAX_LENGTH = None
+        cats[key] = [
             create_corpus(train[:value[0]], max_length=MAX_LENGTH), 
-            create_corpus(test[:value[1]], max_length=MAX_LENGTH)]'''
+            create_corpus(test[:value[1]], max_length=MAX_LENGTH)]
     for key, value in cats.items():
         data["train"]["x"].extend(value[0])
         data["train"]["y"].extend([key]*len(value[0]))
