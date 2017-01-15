@@ -84,7 +84,6 @@ if __name__ == "__main__":
     n = res["n"]
     l = res["l"]
     approx = res["noapprox"]
-    print(approx)
 
     if method == "bow":
         method_name = "bag of words"
