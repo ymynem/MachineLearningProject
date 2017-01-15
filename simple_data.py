@@ -12,7 +12,7 @@ def get_data(categories, seed=0):
         train, test = get_documents(key)
         Random(seed).shuffle(train)
         Random(seed).shuffle(test)
-        MAX_LENGTH = None
+        MAX_LENGTH = 100
         cats[key] = [
             create_corpus(train[:value[0]], max_length=MAX_LENGTH), 
             create_corpus(test[:value[1]], max_length=MAX_LENGTH)]

@@ -13,17 +13,19 @@ def get_gram_matrices(x, y, n, l):
     return X, Y
 
 
-def _get_gram_file_name(i, n, l):
-    return "grams/gram-{}-n{}-l{}.json".format(i, n, l)
+def _get_gram_file_name(i, n, l, comment=""):
+    if comment:
+        comment = "-"+comment
+    return "grams/gram-{}-n{}-l{}{}.json".format(i, n, l, comment)
 
 
-def write_gram_to_file(i, n, l, X, Y):
+def write_gram_to_file(i, n, l, X, Y, comment=""):
     data = {"i": i, "n": n, "l": l, "X": X.tolist(), "Y": Y.tolist()}
-    write_data(_get_gram_file_name(i, n, l), data)
+    write_data(_get_gram_file_name(i, n, l, comment=comment), data)
 
 
-def read_gram_from_file(i, n, l):
-    data = load_data(_get_gram_file_name(i, n, l))
+def read_gram_from_file(i, n, l, comment=""):
+    data = load_data(_get_gram_file_name(i, n, l, comment=comment))
     return data
 
 

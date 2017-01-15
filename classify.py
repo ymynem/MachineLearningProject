@@ -8,6 +8,7 @@ from utils import get_table_values
 from bgm import build_gram_matrix as bgm
 from gram_for_data import write_gram_to_file, read_gram_from_file
 from approx import get_K, get_S, get_top_S
+from ssk import ssk
 
 
 """
@@ -23,7 +24,7 @@ Author: Þorsteinn Daði Gunnarsson
 """
 
 
-def train_and_test_classifier(datasets, method, n=None, l=None):
+def train_and_test_classifier(datasets, method, n=None, l=None, approx=True):
     ys, pr = [], []
 
     for i, data in enumerate(datasets):
@@ -33,12 +34,15 @@ def train_and_test_classifier(datasets, method, n=None, l=None):
         if method == "ssk":
             clf = svm.SVC(kernel="precomputed")
             try:
-                d = read_gram_from_file(i, n, l)
+                d = read_gram_from_file(i, n, l, comment="" if approx else "no-approx")
                 X = d["X"]
                 Y = d["Y"]
             except IOError:
-                S = get_top_S(train["x"], n, count=200)
-                K = get_K(S)
+                if approx:
+                    S = get_top_S(train["x"], n, count=200)
+                    K = get_K(S)
+                else:
+                    K = ssk
                 x = train["x"]
                 X = bgm(x, x, l, n, K=K)
                 y = test["x"]
@@ -71,6 +75,7 @@ if __name__ == "__main__":
     parser.add_argument("-n", type=int, help="N", default=2)
     parser.add_argument("-l", type=float, help="l", default=0.5)
     parser.add_argument("-i", type=int, help="Dataset", default=1)
+    parser.add_argument("-A", "--noapprox", action="store_false", help="Don't use approximate ssk")
     parser.add_argument("-d", "--download", action="store_true", help="Downloads all data needed")
     res = vars(parser.parse_args())
 
@@ -78,6 +83,8 @@ if __name__ == "__main__":
     method = res["Vectorizer"]
     n = res["n"]
     l = res["l"]
+    approx = res["noapprox"]
+    print(approx)
 
     if method == "bow":
         method_name = "bag of words"
@@ -91,6 +98,6 @@ if __name__ == "__main__":
     if res["download"]:
         download()
 
-    from simple_data import SIMPLE_DATA as DATA
-    train_and_test_classifier(DATA[:i], method, n=n, l=l)
+    from simple_data import SIMPLE_DATA as SIMPLE_DATA
+    train_and_test_classifier(DATA[:i], method, n=n, l=l, approx=approx)
 
