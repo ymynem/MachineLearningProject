@@ -14,7 +14,7 @@ Example:
 Author: Fabian Huss
 """
 
-
+'''
 def sorting(n, training, testing):
     """
     n: length of string/word for subset
@@ -80,3 +80,69 @@ def most_common(n, x, train, test):
     train_cmn, test_cmn = list_to_string(train_cmn, test_cmn)
 
     return train_cmn, test_cmn
+'''
+
+
+def sorting(n, training):
+    """
+    n: length of string/word for subset
+    category: which category in reuters to be used
+    
+    Returns a list of x most frequently occuring n length characters in a file
+    """
+
+    ltrain = len(training)
+   
+    train_sub = []
+    
+    train = []
+   
+    for i in range(ltrain):
+        train.append(training[i].split())
+    
+
+    for i in range(len(train)):
+        l = []
+        for j in range(10):
+            l = l + [s for s in train[i] if len(s) == n+j]
+        train_sub.append(l)
+    
+
+    return train_sub  # list ... of ... list of words with n, n+1, n+2-length in each doc
+
+
+def list_to_string(train):
+    training = []
+    
+    for i in range(len(train)):
+        training.append(' '.join(train[i]))
+   
+    return training
+
+
+def most_common(n, x, train):
+    """
+    x: how many most frequently occurring n length words
+    
+    """
+    train = sorting(n, train)
+
+    train_cmn = []
+   
+    ltrain = len(train)
+   
+
+    """
+    appends the x most frequently used n length words to train_cmn/test_cmn
+    for each document
+    """
+    for i in range(ltrain):
+        train_cmn.append(Counter(train[i]).most_common(x))
+   
+    for i in range(ltrain):
+        train_cmn[i] = [x[0] for x in train_cmn[i]]
+    
+
+    train_cmn = list_to_string(train_cmn)
+
+    return train_cmn
