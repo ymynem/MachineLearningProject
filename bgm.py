@@ -12,7 +12,6 @@ def build_gram_matrix(sList, tList, l, n, K=ssk):
         gramMat = np.eye(lenS, lenT, dtype=np.float64)
 
         for i in range(lenS):
-            print("Starting line", i)
             for j in range(i+1, lenT):
                 gramMat[i][j] = gramMat[j][i] = K(sList[i], tList[j], n, l)
             # print("gramMat[{}][{}] = {}".format(i, j, gramMat[i][j]))
