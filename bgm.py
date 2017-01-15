@@ -20,7 +20,6 @@ def build_gram_matrix(sList, tList, l, n, K=ssk):
     else:
         gramMat = np.zeros((lenS, lenT), dtype=np.float64)
         for i in range(lenS):
-            print("Starting line", i)
             for j in range(lenT):
                 gramMat[i][j] = K(sList[i], tList[j], n, l)  # here to calculate the ssk value
 

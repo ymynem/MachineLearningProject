@@ -22,9 +22,9 @@ def load_data(name):
 
 def get_table_values(cats, y_true, y_predicted):
     zipped = list(zip(y_true, y_predicted))
-    f1s = [f1(y_t, y_p, average=None) for y_t, y_p in zipped]
-    pres = [precision(y_t, y_p, average=None) for y_t, y_p in zipped]
-    recs = [recall(y_t, y_p, average=None) for y_t, y_p in zipped]
+    f1s = [f1(y_t, y_p, average=None, pos_label=cats) for y_t, y_p in zipped]
+    pres = [precision(y_t, y_p, average=None, pos_label=cats) for y_t, y_p in zipped]
+    recs = [recall(y_t, y_p, average=None, pos_label=cats) for y_t, y_p in zipped]
     values = {}
     for i, cat in zip(range(len(cats)), cats):
         values[cat] = {
