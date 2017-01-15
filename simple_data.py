@@ -43,7 +43,7 @@ SIMPLE_DATA = get_bulks(SIMPLE_DATA_BULK_COUNT, [
 
 
 VERY_SIMPLE_DATA = get_bulks(10, [ 
-        ("earn", (50, 159)),
+        ("earn", (50, 15)),
         ("acq", (50, 15)),
         ("crude", (50, 15)),
         ("corn", (38, 10)),

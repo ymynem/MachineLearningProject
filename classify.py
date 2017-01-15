@@ -98,6 +98,6 @@ if __name__ == "__main__":
     if res["download"]:
         download()
 
-    from simple_data import SIMPLE_DATA as SIMPLE_DATA
+    from simple_data import DATA as DATA
     train_and_test_classifier(DATA[:i], method, n=n, l=l, approx=approx)
 
